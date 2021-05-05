@@ -1,6 +1,10 @@
-mod vec;
+use matrix::Mat4;
+
+mod vector;
+mod matrix;
 
 fn main() {
-    let origin = vec::Vec3::new(0.0, 0.0, 0.0);
+    let m: Mat4<f64> = Mat4::i();
+    println!("{}", &m * &m);
 
 }
