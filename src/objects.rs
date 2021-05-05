@@ -13,6 +13,7 @@ trait WorldObject<T: Float>
     fn object_matrix(&self) -> &Mat4<T>;
 }
 
+#[derive(Debug)]
 pub struct Sphere<T: Float> {
     object: Mat4<T>
 }
@@ -33,7 +34,7 @@ where T: Float + FromPrimitive + std::ops::Mul<Output=T> {
         let two= FromPrimitive::from_f64(2.0).unwrap();
         
         let a = transformed_direction.dot_product(&transformed_direction);
-        let b: T = transformed_direction.dot_product(&transformed_origin) * two;
+        let b = transformed_direction.dot_product(&transformed_origin) * two;
         let c = transformed_direction.dot_product(&transformed_direction) - T::one();
 
         (true, T::zero())
