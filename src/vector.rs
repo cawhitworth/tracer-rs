@@ -1,5 +1,5 @@
 use num::Float;
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Add, Mul, Sub, Index, IndexMut};
 
 #[derive(Debug, PartialEq)]
 pub struct Vec4<T> 
@@ -21,13 +21,8 @@ where T: Float{
         }
     }
 
-    pub fn dot_product(&self, other: &Vec4<T>) -> Vec4<T> {
-        Vec4 {
-            x: self.x * other.x,
-            y: self.y * other.y,
-            z: self.z * other.z,
-            w: T::one()
-        }
+    pub fn dot_product(&self, other: &Vec4<T>) -> T {
+        self.x * other.x + self.y * other.y + self.z * other.z
     }
 
     pub fn cross_product(&self, other: &Vec4<T>) -> Vec4<T> {
@@ -40,7 +35,7 @@ where T: Float{
     }
 
     pub fn mag(&self) -> T {
-        Float::sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+        Float::sqrt(self.dot_product(self))
     }
 
     pub fn normalized(&self) -> Vec4<T> {
@@ -85,6 +80,35 @@ where T: Float {
     }
 }
 
+impl<T> Index<usize> for Vec4<T>
+where T: Float {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &T {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            3 => &self.w,
+            _ => std::panic!("Vector index must be 0..3")
+        }
+    }
+}
+
+impl<T> IndexMut<usize> for Vec4<T>
+where T: Float {
+
+    fn index_mut(&mut self, index: usize) -> &mut T {
+        match index {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
+            3 => &mut self.w,
+            _ => std::panic!("Vector index must be 0..3")
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -123,8 +147,8 @@ mod tests {
         let u = Vec4::new(1.0, 2.0, 3.0);
         let v = Vec4::new(-1.0, -2.0, -3.0);
 
-        assert_eq!(Vec4::new(-1.0, -4.0, -9.0), u.dot_product(&v));
-        assert_eq!(Vec4::new(-1.0, -4.0, -9.0), v.dot_product(&u));
+        assert_eq!(-14.0, u.dot_product(&v));
+        assert_eq!(-14.0, v.dot_product(&u));
         assert_eq!(u.dot_product(&v), v.dot_product(&u));
     }
 
@@ -161,5 +185,20 @@ mod tests {
         let v = Vec4::new(-3.0, 2.0, 0.0);
         let w = u.cross_product(&v).normalized();
         assert_eq!(Vec4::new(0.0, 0.0, 1.0), w);
+    }
+
+    #[test]
+    fn index_ro() {
+        let u = Vec4::new(1.0, 2.0, 3.0);
+        assert_eq!(1.0, u[0]);
+        assert_eq!(2.0, u[1]);
+        assert_eq!(3.0, u[2]);
+    }
+
+    #[test]
+    fn index_rw() {
+        let mut u = Vec4::new(1.0, 2.0, 3.0);
+        u[0] = u[1];
+        assert_eq!(u[0], u[1]);
     }
 }

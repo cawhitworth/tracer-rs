@@ -2,6 +2,8 @@ use num::Float;
 use std::fmt;
 use std::ops::{Index, IndexMut, Mul};
 
+use crate::vector::Vec4;
+
 #[derive(Debug, PartialEq)]
 pub struct Mat4<T>
 where T: Float {
@@ -28,6 +30,46 @@ where T: Float {
                 zero, zero, zero, one
             ]
         }
+    }
+
+    pub fn camera(fwd: &Vec4<T>, right: &Vec4<T>, up: &Vec4<T>, pos: &Vec4<T>) -> Mat4<T> {
+        let zero = T::zero();
+        let one = T::one();
+        Mat4 {
+            d: [
+                right.x, up.x, fwd.x, pos.x,
+                right.y, up.y, fwd.y, pos.y,
+                right.z, up.z, fwd.z, pos.z,
+                zero,    zero, zero,  one
+            ]
+        }
+    }
+
+    pub fn look(position: &Vec4<T>, look_at: &Vec4<T>) -> Mat4<T> {
+        let direction = (look_at - position).normalized();
+        let temp_up = Vec4::new(T::zero(), T::one(), T::zero());
+        let right = temp_up.cross_product(&direction).normalized();
+        let up = direction.cross_product(&right).normalized();
+
+        Mat4::camera(&direction, &right, &up, &position)
+    }
+
+    pub fn translation(translation: &Vec4<T>) -> Mat4<T> {
+        let mut t: Mat4<T> = Mat4::i();
+        t[(3,0)] = translation.x;
+        t[(3,1)] = translation.y;
+        t[(3,2)] = translation.z;
+
+        t
+    }
+
+    pub fn scale(factor: &Vec4<T>) -> Mat4<T> {
+        let mut s: Mat4<T> = Mat4::i();
+        s[(0,0)] = factor.x;
+        s[(1,1)] = factor.y;
+        s[(2,2)] = factor.z;
+
+        s
     }
 }
 
@@ -106,6 +148,24 @@ where T: Float {
     }
 }
 
+impl<T> Mul<&Vec4<T>> for &Mat4<T>
+where T: Float {
+    type Output = Vec4<T>;
+
+    fn mul(self, rhs: &Vec4<T>) -> Self::Output {
+        let mut r = Vec4::new(T::zero(), T::zero(), T::zero());
+
+        for row in 0..4 {
+            r[row] = self[(row, 0)] * rhs[0] +
+                self[(row, 1)] * rhs[1] +
+                self[(row, 2)] * rhs[2] +
+                self[(row, 3)] * rhs[3];
+        }
+        r
+
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -159,5 +219,15 @@ mod tests {
 
         let result = &i * &i;
         assert_eq!(i, result);
+    }
+
+    #[test]
+    fn look_at()
+    {
+        let pos = Vec4::new(0.0, 0.0, -10.0);
+        let origin = Vec4::new(0.0, 0.0, 0.0);
+        let camera = Mat4::look(&pos, &origin);
+
+        println!("{}", camera)
     }
 }
