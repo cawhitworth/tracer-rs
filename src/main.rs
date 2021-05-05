@@ -1,3 +1,6 @@
+mod vec;
+
 fn main() {
-    println!("Hello, world!");
+    let origin = vec::Vec3::new(0.0, 0.0, 0.0);
+
 }
