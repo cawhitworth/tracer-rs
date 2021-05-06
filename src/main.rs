@@ -1,9 +1,11 @@
+mod vector;
+mod matrix;
+mod object;
+
 use matrix::Mat4;
 use vector::Vec4;
 
-mod vector;
-mod matrix;
-mod objects;
+use object::sphere::Sphere;
 
 fn main() {
     let fwd = Vec4::new(0.0, 0.0, 1.0);
@@ -15,7 +17,7 @@ fn main() {
 
     println!("{}", &camera);
 
-    let sphere = objects::Sphere::new(Vec4::new(0.0, 2.0, 0.0), 2.0);
+    let sphere = Sphere::new(Vec4::new(0.0, 2.0, 0.0), 2.0);
 
     println!("{:?}", &sphere);
 }
