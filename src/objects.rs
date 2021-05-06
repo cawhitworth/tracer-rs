@@ -8,24 +8,30 @@ use crate::matrix::Mat4;
 trait Intersectable<T: Float>
 {
     fn intersect(&self, origin: &Vec4<T>, direction: &Vec4<T>) -> (bool, T);
+    fn normal(&self, intersect_point: &Vec4<T>) -> Vec4<T>;
 }
 
 trait WorldObject<T: Float>
 {
     fn object_matrix(&self) -> &Mat4<T>;
+    fn object_matrix_inv(&self) -> &Mat4<T>;
 }
 
 #[derive(Debug)]
 pub struct Sphere<T: Float> {
-    object: Mat4<T>
+    object: Mat4<T>,
+    object_inverse: Mat4<T>
 }
 
 impl<T: Float> WorldObject<T> for Sphere<T> {
     fn object_matrix(&self) -> &Mat4<T> {
         &self.object
     }
-}
 
+    fn object_matrix_inv(&self) -> &Mat4<T> {
+        &self.object_inverse
+    }
+}
 
 impl<T> Intersectable<T> for Sphere<T> 
 where T: Float + FromPrimitive {
@@ -37,8 +43,8 @@ where T: Float + FromPrimitive {
         let four: T = FromPrimitive::from_f64(4.0).unwrap();
         
         let a = transformed_direction.dot_product(&transformed_direction);
-        let b  = transformed_direction.dot_product(&transformed_origin) * two;
-        let c = transformed_direction.dot_product(&transformed_direction) - T::one();
+        let b = transformed_direction.dot_product(&transformed_origin) * two;
+        let c = transformed_origin.dot_product(&transformed_origin) - T::one();
 
         let discriminant = (b*b) - (four*a*c);
         if discriminant < T::zero() {
@@ -66,6 +72,11 @@ where T: Float + FromPrimitive {
 
         (true, t0)
     }
+
+    fn normal(&self, intersect_point: &Vec4<T>) -> Vec4<T> {
+        let v = self.object_matrix_inv() * intersect_point;
+        v.normalized() 
+    }
 }
 
 impl<T: Float> Sphere<T> {
@@ -74,8 +85,12 @@ impl<T: Float> Sphere<T> {
         let scale_vec = Vec4::new(radius, radius, radius);
         let scale = Mat4::scale(&scale_vec);
 
+        let object_matrix = &o * &scale;
+        let object_matrix_inverse = object_matrix.inverse();
+
         Sphere {
-            object: &o * &scale
+            object: object_matrix,
+            object_inverse: object_matrix_inverse
         }
     }
 }
@@ -90,5 +105,30 @@ mod tests {
         let s: Sphere<f64> = Sphere::new(o, 2.0);
 
         println!("{}", s.object_matrix())
+    }
+
+    #[test]
+    fn sphere_intersect() {
+        let o = Vec4::new(0.0, 0.0, 0.0);
+        let s = Sphere::new(o, 1.0);
+        let ray_origin = Vec4::new(0.0, 0.0, -10.0);
+        let ray_direction = Vec4::new(0.0, 0.0, 1.0);
+
+        let (intersected, t) = s.intersect(&ray_origin, &ray_direction);
+
+        assert_eq!(intersected, true);
+        assert_eq!(9.0, t);
+    }
+
+    #[test]
+    fn sphere_norm() {
+        let o = Vec4::new(0.0, 0.0, 0.0);
+        let s = Sphere::new(o, 1.0);
+        // Sphere at origin, normal at any point should be the same as point vector
+
+        let p = Vec4::new(0.0, 1.0, 0.0);
+        let n = s.normal(&p);
+
+        assert_eq!(p, n);
     }
 }

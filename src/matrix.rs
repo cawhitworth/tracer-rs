@@ -71,6 +71,136 @@ where T: Float {
 
         s
     }
+
+    pub fn inverse(&self) -> Mat4<T> {
+        let mut inv = Mat4::new();
+
+        inv[0] = self[5]  * self[10] * self[15] - 
+            self[5]  * self[11] * self[14] - 
+            self[9]  * self[6]  * self[15] + 
+            self[9]  * self[7]  * self[14] +
+            self[13] * self[6]  * self[11] - 
+            self[13] * self[7]  * self[10];
+
+        inv[4] = -self[4]  * self[10] * self[15] + 
+            self[4]  * self[11] * self[14] + 
+            self[8]  * self[6]  * self[15] - 
+            self[8]  * self[7]  * self[14] - 
+            self[12] * self[6]  * self[11] + 
+            self[12] * self[7]  * self[10];
+
+        inv[8] = self[4]  * self[9] * self[15] - 
+            self[4]  * self[11] * self[13] - 
+            self[8]  * self[5] * self[15] + 
+            self[8]  * self[7] * self[13] + 
+            self[12] * self[5] * self[11] - 
+            self[12] * self[7] * self[9];
+
+        inv[12] = -self[4]  * self[9] * self[14] + 
+            self[4]  * self[10] * self[13] +
+            self[8]  * self[5] * self[14] - 
+            self[8]  * self[6] * self[13] - 
+            self[12] * self[5] * self[10] + 
+            self[12] * self[6] * self[9];
+
+        inv[1] = -self[1]  * self[10] * self[15] + 
+            self[1]  * self[11] * self[14] + 
+            self[9]  * self[2] * self[15] - 
+            self[9]  * self[3] * self[14] - 
+            self[13] * self[2] * self[11] + 
+            self[13] * self[3] * self[10];
+
+        inv[5] = self[0]  * self[10] * self[15] - 
+            self[0]  * self[11] * self[14] - 
+            self[8]  * self[2] * self[15] + 
+            self[8]  * self[3] * self[14] + 
+            self[12] * self[2] * self[11] - 
+            self[12] * self[3] * self[10];
+
+        inv[9] = -self[0]  * self[9] * self[15] + 
+            self[0]  * self[11] * self[13] + 
+            self[8]  * self[1] * self[15] - 
+            self[8]  * self[3] * self[13] - 
+            self[12] * self[1] * self[11] + 
+            self[12] * self[3] * self[9];
+
+        inv[13] = self[0]  * self[9] * self[14] - 
+            self[0]  * self[10] * self[13] - 
+            self[8]  * self[1] * self[14] + 
+            self[8]  * self[2] * self[13] + 
+            self[12] * self[1] * self[10] - 
+            self[12] * self[2] * self[9];
+
+        inv[2] = self[1]  * self[6] * self[15] - 
+            self[1]  * self[7] * self[14] - 
+            self[5]  * self[2] * self[15] + 
+            self[5]  * self[3] * self[14] + 
+            self[13] * self[2] * self[7] - 
+            self[13] * self[3] * self[6];
+
+        inv[6] = -self[0]  * self[6] * self[15] + 
+            self[0]  * self[7] * self[14] + 
+            self[4]  * self[2] * self[15] - 
+            self[4]  * self[3] * self[14] - 
+            self[12] * self[2] * self[7] + 
+            self[12] * self[3] * self[6];
+
+        inv[10] = self[0]  * self[5] * self[15] - 
+            self[0]  * self[7] * self[13] - 
+            self[4]  * self[1] * self[15] + 
+            self[4]  * self[3] * self[13] + 
+            self[12] * self[1] * self[7] - 
+            self[12] * self[3] * self[5];
+
+        inv[14] = -self[0]  * self[5] * self[14] + 
+            self[0]  * self[6] * self[13] + 
+            self[4]  * self[1] * self[14] - 
+            self[4]  * self[2] * self[13] - 
+            self[12] * self[1] * self[6] + 
+            self[12] * self[2] * self[5];
+
+        inv[3] = -self[1] * self[6] * self[11] + 
+            self[1] * self[7] * self[10] + 
+            self[5] * self[2] * self[11] - 
+            self[5] * self[3] * self[10] - 
+            self[9] * self[2] * self[7] + 
+            self[9] * self[3] * self[6];
+
+        inv[7] = self[0] * self[6] * self[11] - 
+            self[0] * self[7] * self[10] - 
+            self[4] * self[2] * self[11] + 
+            self[4] * self[3] * self[10] + 
+            self[8] * self[2] * self[7] - 
+            self[8] * self[3] * self[6];
+
+        inv[11] = -self[0] * self[5] * self[11] + 
+            self[0] * self[7] * self[9] + 
+            self[4] * self[1] * self[11] - 
+            self[4] * self[3] * self[9] - 
+            self[8] * self[1] * self[7] + 
+            self[8] * self[3] * self[5];
+
+        inv[15] = self[0] * self[5] * self[10] - 
+            self[0] * self[6] * self[9] - 
+            self[4] * self[1] * self[10] + 
+            self[4] * self[2] * self[9] + 
+            self[8] * self[1] * self[6] - 
+            self[8] * self[2] * self[5];
+
+        let mut det = self[0] * inv[0] + self[1] * inv[4] + self[2] * inv[8] + self[3] * inv[12];
+
+        if det == T::zero() {
+            return Mat4::i();
+        }
+
+        det = T::one() / det;
+
+        for i in 0..16 {
+            inv[i] = inv[i] * det;
+        }
+
+        inv
+    }
 }
 
 impl<T> fmt::Display for Mat4<T>
