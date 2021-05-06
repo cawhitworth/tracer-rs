@@ -13,15 +13,13 @@ pub struct Engine<T: Float> {
     objects: Vec<Box<dyn Intersectable<T>>>
 }
 
-pub enum Hit<'a, T: Float> {
+enum TraceResult<'a, T: Float> {
     Miss,
-    Hit(
-        Vec4<T>,
-         &'a Box<dyn Intersectable<T>>
-    ),
+    Hit(Vec4<T>, &'a Box<dyn Intersectable<T>>),
 }
 
-impl<T: Float + FromPrimitive + std::fmt::Debug> Engine<T> {
+impl<T> Engine<T> 
+where T: Float + FromPrimitive + std::fmt::Debug {
     pub fn new(view: Mat4<T>) -> Engine<T> {
         Engine {
             view: view,
@@ -33,20 +31,20 @@ impl<T: Float + FromPrimitive + std::fmt::Debug> Engine<T> {
         self.objects.push(object);
     }
 
-    pub fn trace_ray(&self, origin: &Vec4<T>, direction: &Vec4<T>) -> Hit<T> {
+    fn trace_ray(&self, origin: &Vec4<T>, direction: &Vec4<T>) -> TraceResult<T> {
         for o in self.objects.iter() {
             let result = o.intersect(origin, direction);
             match result {
                 IntersectResult::Intersect(t) => {
                     let v = direction * t;
                     let intersect_point = origin + &v;
-                    return Hit::Hit(intersect_point, o);
+                    return TraceResult::Hit(intersect_point, o);
                 },
                 _ => {}
             }
         }
             
-        Hit::Miss 
+        TraceResult::Miss 
     }
 
     fn illuminate(&self, point: &Vec4<T>, object: &Box<dyn Intersectable<T>>) -> Rgb<u8> {
@@ -72,8 +70,8 @@ impl<T: Float + FromPrimitive + std::fmt::Debug> Engine<T> {
         let hit = self.trace_ray(&world_origin, &world_direction);
 
         match hit {
-            Hit::Miss => image::Rgb([0,0,0]),
-            Hit::Hit(point, object) => self.illuminate(&point, object)
+            TraceResult::Miss => image::Rgb([0,0,0]),
+            TraceResult::Hit(point, object) => self.illuminate(&point, object)
         }
 
     }
