@@ -76,7 +76,7 @@ where T: Float {
     type Output = Vec4<T>;
 
     fn sub(self, other: &Vec4<T>) -> Vec4<T> {
-        Vec4 { x: self.x - other.x, y: self.y - other.y, z: self.z - other.z, w: self.w }
+        Vec4 { x: self.x - other.x, y: self.y - other.y, z: self.z - other.z, w: T::zero() }
     }
 }
 
@@ -129,9 +129,25 @@ mod tests {
     }
 
     #[test]
-    fn add() {
+    fn add_position() {
         let u = Vec4::position(1.0, 2.0, 3.0);
         let v = Vec4::position(-1.0, -2.0, -3.0);
+        assert_eq!(Vec4::position(2.0, 4.0, 6.0), &u + &u);
+        assert_eq!(Vec4::position(0.0, 0.0, 0.0), &u + &v);
+    }
+
+    #[test]
+    fn add_direction() {
+        let u = Vec4::direction(1.0, 2.0, 3.0);
+        let v = Vec4::direction(-1.0, -2.0, -3.0);
+        assert_eq!(Vec4::direction(2.0, 4.0, 6.0), &u + &u);
+        assert_eq!(Vec4::direction(0.0, 0.0, 0.0), &u + &v);
+    }
+
+    #[test]
+    fn add_direction_to_position() {
+        let u = Vec4::position(1.0, 2.0, 3.0);
+        let v = Vec4::direction(-1.0, -2.0, -3.0);
         assert_eq!(Vec4::position(2.0, 4.0, 6.0), &u + &u);
         assert_eq!(Vec4::position(0.0, 0.0, 0.0), &u + &v);
     }
@@ -140,8 +156,8 @@ mod tests {
     fn sub() {
         let u = Vec4::position(1.0, 2.0, 3.0);
         let v = Vec4::position(-1.0, -2.0, -3.0);
-        assert_eq!(Vec4::position(2.0, 4.0, 6.0), &u - &v);
-        assert_eq!(Vec4::position(0.0, 0.0, 0.0), &u - &u);
+        assert_eq!(Vec4::direction(2.0, 4.0, 6.0), &u - &v);
+        assert_eq!(Vec4::direction(0.0, 0.0, 0.0), &u - &u);
     }
 
     #[test]
