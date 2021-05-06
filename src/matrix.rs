@@ -47,7 +47,7 @@ where T: Float {
 
     pub fn look(position: &Vec4<T>, look_at: &Vec4<T>) -> Mat4<T> {
         let direction = (look_at - position).normalized();
-        let temp_up = Vec4::new(T::zero(), T::one(), T::zero());
+        let temp_up = Vec4::direction(T::zero(), T::one(), T::zero());
         let right = temp_up.cross_product(&direction).normalized();
         let up = direction.cross_product(&right).normalized();
 
@@ -283,13 +283,13 @@ where T: Float {
     type Output = Vec4<T>;
 
     fn mul(self, rhs: &Vec4<T>) -> Self::Output {
-        let mut r = Vec4::new(T::zero(), T::zero(), T::zero());
+        let mut r = Vec4::position(T::zero(), T::zero(), T::zero());
 
         for row in 0..4 {
-            r[row] = self[(row, 0)] * rhs[0] +
-                self[(row, 1)] * rhs[1] +
-                self[(row, 2)] * rhs[2] +
-                self[(row, 3)] * rhs[3];
+            r[row] = self[(0, row)] * rhs[0] +
+                self[(1, row)] * rhs[1] +
+                self[(2, row)] * rhs[2] +
+                self[(3, row)] * rhs[3];
         }
         r
 
@@ -354,8 +354,8 @@ mod tests {
     #[test]
     fn look_at()
     {
-        let pos = Vec4::new(0.0, 0.0, -10.0);
-        let origin = Vec4::new(0.0, 0.0, 0.0);
+        let pos = Vec4::position(0.0, 0.0, -10.0);
+        let origin = Vec4::position(0.0, 0.0, 0.0);
         let camera = Mat4::look(&pos, &origin);
 
         println!("{}", camera)

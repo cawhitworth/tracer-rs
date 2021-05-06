@@ -25,8 +25,8 @@ impl<T: Float> WorldObject<T> for Sphere<T> {
 impl<T> Intersectable<T> for Sphere<T> 
 where T: Float + FromPrimitive {
     fn intersect(&self, origin: &Vec4<T>, direction: &Vec4<T>) -> (bool, T) {
-        let transformed_origin = self.object_matrix() * origin;
-        let transformed_direction = self.object_matrix() * direction;
+        let transformed_origin = self.object_matrix_inv() * origin;
+        let transformed_direction = self.object_matrix_inv() * direction;
 
         let two= FromPrimitive::from_f64(2.0).unwrap();
         let four: T = FromPrimitive::from_f64(4.0).unwrap();
@@ -71,10 +71,10 @@ where T: Float + FromPrimitive {
 impl<T: Float> Sphere<T> {
     pub fn new(origin: Vec4<T>, radius: T) -> Sphere<T> {
         let o: Mat4<T> = Mat4::translation(&origin);
-        let scale_vec = Vec4::new(radius, radius, radius);
+        let scale_vec = Vec4::direction(radius, radius, radius);
         let scale = Mat4::scale(&scale_vec);
 
-        let object_matrix = &o * &scale;
+        let object_matrix = &scale * &o;
         let object_matrix_inverse = object_matrix.inverse();
 
         Sphere {
@@ -90,7 +90,7 @@ mod tests {
 
     #[test]
     fn construct_sphere() {
-        let o: Vec4<f64> = Vec4::new(0.0, 2.0, 0.0);
+        let o: Vec4<f64> = Vec4::position(0.0, 2.0, 0.0);
         let s: Sphere<f64> = Sphere::new(o, 2.0);
 
         println!("{}", s.object_matrix())
@@ -98,10 +98,10 @@ mod tests {
 
     #[test]
     fn sphere_intersect() {
-        let o = Vec4::new(0.0, 0.0, 0.0);
+        let o = Vec4::position(0.0, 0.0, 0.0);
         let s = Sphere::new(o, 1.0);
-        let ray_origin = Vec4::new(0.0, 0.0, -10.0);
-        let ray_direction = Vec4::new(0.0, 0.0, 1.0);
+        let ray_origin = Vec4::position(0.0, 0.0, -10.0);
+        let ray_direction = Vec4::direction(0.0, 0.0, 1.0);
 
         let (intersected, t) = s.intersect(&ray_origin, &ray_direction);
 
@@ -110,12 +110,24 @@ mod tests {
     }
 
     #[test]
+    fn sphere_intersect_translated() {
+        let o = Vec4::position(0.0, 2.0, 0.0);
+        let s = Sphere::new(o, 1.0);
+        let ray_origin = Vec4::position(0.0, 0.0, -10.0);
+        let ray_direction = Vec4::direction(0.0, 0.0, 1.0);
+
+        let (intersected, _) = s.intersect(&ray_origin, &ray_direction);
+
+        assert_eq!(intersected, false);
+    }
+
+    #[test]
     fn sphere_norm() {
-        let o = Vec4::new(0.0, 0.0, 0.0);
+        let o = Vec4::position(0.0, 0.0, 0.0);
         let s = Sphere::new(o, 1.0);
         // Sphere at origin, normal at any point should be the same as point vector
 
-        let p = Vec4::new(0.0, 1.0, 0.0);
+        let p = Vec4::position(0.0, 1.0, 0.0);
         let n = s.normal(&p);
 
         assert_eq!(p, n);
