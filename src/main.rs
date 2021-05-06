@@ -17,9 +17,5 @@ fn main() {
 
     let sphere = objects::Sphere::new(Vec4::new(0.0, 2.0, 0.0), 2.0);
 
-}
-
-fn test<T: std::ops::Add<Output = T> + num::FromPrimitive>(a: T) -> T {
-    let b = num::FromPrimitive::from_f64(2.0).unwrap();
-    a + b
+    println!("{:?}", &sphere);
 }
