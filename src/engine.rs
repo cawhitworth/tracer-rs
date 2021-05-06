@@ -1,7 +1,7 @@
 extern crate image;
 
 use image::Rgb;
-use num::{Float, FromPrimitive};
+use num::{Float, FromPrimitive, ToPrimitive};
 
 use crate::matrix::Mat4;
 use crate::object::Intersectable;
@@ -39,10 +39,26 @@ impl<T: Float + FromPrimitive + std::fmt::Debug> Engine<T> {
             if hit {
                 let v = direction * t;
                 let intersect_point = origin + &v;
-                return Hit::Hit( intersect_point, o)
+                return Hit::Hit(intersect_point, o)
             }
         }
         Hit::Miss 
+    }
+
+    fn illuminate(&self, point: &Vec4<T>, object: &Box<dyn Intersectable<T>>) -> Rgb<u8> {
+        let dir_light = Vec4::direction(T::one(), -T::one(), T::one()).normalized();
+
+        let norm = object.normal(point).normalized();
+        
+        let illum = norm.dot_product(&dir_light);
+        if illum < T::zero() {
+            return image::Rgb([0,0,0])
+        }
+
+        let max_u8 = FromPrimitive::from_u8(0xff).unwrap();
+        let illum_scaled = illum * max_u8;
+        let illum_u8 = illum_scaled.to_u8().unwrap();
+        image::Rgb([illum_u8, illum_u8, illum_u8])
     }
 
     fn trace_and_illuminate(&self, world_origin: Vec4<T>, target: Vec4<T>) -> Rgb<u8> {
@@ -52,7 +68,7 @@ impl<T: Float + FromPrimitive + std::fmt::Debug> Engine<T> {
 
         match hit {
             Hit::Miss => image::Rgb([0,0,0]),
-            Hit::Hit(_, _) => image::Rgb([255, 255, 255])
+            Hit::Hit(point, object) => self.illuminate(&point, object)
         }
 
     }
@@ -79,7 +95,7 @@ impl<T: Float + FromPrimitive + std::fmt::Debug> Engine<T> {
                 let mut fx = FromPrimitive::from_u32(x).unwrap();
                 let mut fy = FromPrimitive::from_u32(y).unwrap();
                 fx = -T::one() + fx * fx_scale;
-                fy = -T::one() + fy * fy_scale;
+                fy = T::one() - fy * fy_scale;
                 let target = Vec4::position(fx, fy, T::zero());
                 image.put_pixel(x, y, self.trace_and_illuminate(world_origin, target));
 
