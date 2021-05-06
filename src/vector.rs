@@ -56,6 +56,15 @@ where T: Float{
             w: self.w
         }
     }
+
+    pub fn reverse(&self) -> Vec4<T> {
+        Vec4 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+            w: self.w
+        }
+    }
 }
 
 /*

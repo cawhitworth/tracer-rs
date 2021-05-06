@@ -17,7 +17,7 @@ fn main() -> Result<(), ImageError> {
 
     let camera = Mat4::camera(&fwd, &right, &up, &pos);
 
-    let sphere = Sphere::new(Vec4::position(0.0, 4.0, 0.0), 8.0);
+    let sphere = Sphere::new(Vec4::position(0.0, 0.0, 0.0), 8.0);
 
     let mut engine = Engine::new(camera);
     engine.add(Box::new(sphere));

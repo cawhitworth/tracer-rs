@@ -1,7 +1,7 @@
 extern crate image;
 
 use image::Rgb;
-use num::{Float, FromPrimitive, ToPrimitive};
+use num::{Float, FromPrimitive};
 
 use crate::matrix::Mat4;
 use crate::object::Intersectable;
@@ -47,10 +47,11 @@ impl<T: Float + FromPrimitive + std::fmt::Debug> Engine<T> {
 
     fn illuminate(&self, point: &Vec4<T>, object: &Box<dyn Intersectable<T>>) -> Rgb<u8> {
         let dir_light = Vec4::direction(T::one(), -T::one(), T::one()).normalized();
+        let dir_light_inv = dir_light.reverse();
 
         let norm = object.normal(point).normalized();
         
-        let illum = norm.dot_product(&dir_light);
+        let illum = norm.dot_product(&dir_light_inv);
         if illum < T::zero() {
             return image::Rgb([0,0,0])
         }
