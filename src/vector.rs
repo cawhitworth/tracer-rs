@@ -13,21 +13,11 @@ where T: Float {
 impl<T> Vec4<T>
 where T: Float{
     pub fn position(x: T, y: T, z: T) -> Vec4<T> {
-        Vec4 {
-            x: x,
-            y: y,
-            z: z,
-            w: T::one()
-        }
+        Vec4 { x, y, z, w: T::one() }
     }
     
     pub fn direction(x: T, y: T, z: T) -> Vec4<T> {
-        Vec4 {
-            x: x,
-            y: y,
-            z: z,
-            w: T::zero()
-        }
+        Vec4 { x, y, z, w: T::zero() }
     }
 
     pub fn dot_product(&self, other: &Vec4<T>) -> T {

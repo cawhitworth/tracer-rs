@@ -21,10 +21,7 @@ enum TraceResult<'a, T: Float> {
 impl<T> Engine<T> 
 where T: Float + FromPrimitive + std::fmt::Debug {
     pub fn new(view: Mat4<T>) -> Engine<T> {
-        Engine {
-            view: view,
-            objects: vec![]
-        }
+        Engine { view, objects: vec![] }
     }
 
     pub fn add(&mut self, object: Box<dyn Intersectable<T>>) {

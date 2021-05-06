@@ -59,7 +59,7 @@ where T: Float + FromPrimitive {
             return IntersectResult::Intersect(t1);
         }
 
-        return IntersectResult::Intersect(t0);
+        IntersectResult::Intersect(t0)
     }
 
     fn normal(&self, intersect_point: &Vec4<T>) -> Vec4<T> {
