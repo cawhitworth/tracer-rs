@@ -1,4 +1,4 @@
-use num::Float;
+use num::{Float, FromPrimitive};
 use std::fmt;
 use std::ops::{Index, IndexMut, Mul};
 
@@ -11,7 +11,7 @@ where T: Float {
 }
 
 impl<T> Mat4<T>
-where T: Float {
+where T: Float + FromPrimitive {
     pub fn new() -> Mat4<T> {
         Mat4 {
             d: [ T::zero(); 16 ]
@@ -52,6 +52,23 @@ where T: Float {
         let up = direction.cross_product(&right).normalized();
 
         Mat4::camera(&direction, &right, &up, &position)
+    }
+
+    pub fn perspective(fov: T, near: T, far: T) -> Mat4<T> {
+        let two = FromPrimitive::from_f64(2.0).unwrap();
+        let pi_div_180 = FromPrimitive::from_f64(3.14159 / 180.0).unwrap();
+
+        let s = T::one() / T::tan((fov / two) * pi_div_180);
+
+        let mut m = Mat4::i();
+        m[(0,0)] = s;
+        m[(1,1)] = s;
+        m[(2,2)] = -far / (far - near);
+        m[(2,3)] = -(far * near) / (far - near);
+        m[(3,2)] = -T::one();
+        m[(3,3)] = T::zero();
+
+        m
     }
 
     pub fn translation(translation: &Vec4<T>) -> Mat4<T> {
@@ -260,7 +277,7 @@ where T: Float {
 }
 
 impl<T> Mul for &Mat4<T>
-where T: Float {
+where T: Float + FromPrimitive {
     type Output = Mat4<T>;
 
     fn mul(self, rhs: Self) -> Self::Output {

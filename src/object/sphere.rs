@@ -68,7 +68,8 @@ where T: Float + FromPrimitive {
     }
 }
 
-impl<T: Float> Sphere<T> {
+impl<T> Sphere<T>
+where T: Float + FromPrimitive {
     pub fn new(origin: Vec4<T>, radius: T) -> Sphere<T> {
         let o: Mat4<T> = Mat4::translation(&origin);
         let scale_vec = Vec4::direction(radius, radius, radius);

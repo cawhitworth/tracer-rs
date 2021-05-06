@@ -10,6 +10,7 @@ use crate::vector::Vec4;
 
 pub struct Engine<T: Float> {
     view: Mat4<T>,
+    view_projection: Mat4<T>,
     objects: Vec<Box<dyn Intersectable<T>>>
 }
 
@@ -22,8 +23,9 @@ pub enum Hit<'a, T: Float> {
 }
 
 impl<T: Float + FromPrimitive + std::fmt::Debug> Engine<T> {
-    pub fn new(view: Mat4<T>) -> Engine<T> {
+    pub fn new(view: Mat4<T>, projection: Mat4<T>) -> Engine<T> {
         Engine {
+            view_projection: &projection * &view,
             view: view,
             objects: vec![]
         }
@@ -45,8 +47,7 @@ impl<T: Float + FromPrimitive + std::fmt::Debug> Engine<T> {
         Hit::Miss 
     }
 
-    fn trace_and_illuminate(&self, world_origin: Vec4<T>, target: Vec4<T>) -> Rgb<u8> {
-        let world_target = &self.view * &target;
+    fn trace_and_illuminate(&self, world_origin: Vec4<T>, world_target: Vec4<T>) -> Rgb<u8> {
         let world_direction = (&world_target - &world_origin).normalized();
         let hit = self.trace_ray(&world_origin, &world_direction);
 
@@ -62,11 +63,9 @@ impl<T: Float + FromPrimitive + std::fmt::Debug> Engine<T> {
         image.put_pixel(0, 0, image::Rgb([255, 255, 255]));
 
         let two: T = FromPrimitive::from_f64(2.0).unwrap();
-        let hfov: T = FromPrimitive::from_f64(90.0).unwrap();
 
-        let distance = T::one() / (T::tan(hfov / two));
-        let origin = Vec4::position(T::zero(), T::zero(), -distance);
-        let world_origin = &self.view * &origin;
+        let origin = Vec4::position(T::zero(), T::zero(), T::zero());
+        let world_origin = &self.view_projection * &origin;
 
         let fwidth: T = FromPrimitive::from_u32(width).unwrap();
         let fheight: T = FromPrimitive::from_u32(height).unwrap();
@@ -81,7 +80,9 @@ impl<T: Float + FromPrimitive + std::fmt::Debug> Engine<T> {
                 fx = -T::one() + fx * fx_scale;
                 fy = -T::one() + fy * fy_scale;
                 let target = Vec4::position(fx, fy, T::zero());
-                image.put_pixel(x, y, self.trace_and_illuminate(world_origin, target));
+                let world_target = &self.view * &target;
+
+                image.put_pixel(x, y, self.trace_and_illuminate(world_origin, world_target));
 
             }
         }
@@ -95,6 +96,7 @@ mod test {
     #[test]
     fn construct() {
         let view = Mat4::i();
-        let _: Engine<f64> = Engine::new(view);
+        let projection = Mat4::i();
+        let _: Engine<f64> = Engine::new(view, projection);
     }
 }
