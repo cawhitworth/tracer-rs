@@ -2,11 +2,11 @@ extern crate image;
 
 use image::Rgb;
 use num::{Float, FromPrimitive};
-
-use crate::matrix::Mat4;
-use crate::object::Intersectable;
 use std::vec;
+
 use crate::vector::Vec4;
+use crate::matrix::Mat4;
+use crate::object::*;
 
 pub struct Engine<T: Float> {
     view: Mat4<T>,
@@ -35,13 +35,17 @@ impl<T: Float + FromPrimitive + std::fmt::Debug> Engine<T> {
 
     pub fn trace_ray(&self, origin: &Vec4<T>, direction: &Vec4<T>) -> Hit<T> {
         for o in self.objects.iter() {
-            let (hit, t) = o.intersect(origin, direction);
-            if hit {
-                let v = direction * t;
-                let intersect_point = origin + &v;
-                return Hit::Hit(intersect_point, o)
+            let result = o.intersect(origin, direction);
+            match result {
+                IntersectResult::Intersect(t) => {
+                    let v = direction * t;
+                    let intersect_point = origin + &v;
+                    return Hit::Hit(intersect_point, o);
+                },
+                _ => {}
             }
         }
+            
         Hit::Miss 
     }
 

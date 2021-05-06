@@ -24,7 +24,7 @@ impl<T: Float> WorldObject<T> for Sphere<T> {
 
 impl<T> Intersectable<T> for Sphere<T> 
 where T: Float + FromPrimitive {
-    fn intersect(&self, origin: &Vec4<T>, direction: &Vec4<T>) -> (bool, T) {
+    fn intersect(&self, origin: &Vec4<T>, direction: &Vec4<T>) -> IntersectResult<T> {
         let transformed_origin = self.object_matrix_inv() * origin;
         let transformed_direction = self.object_matrix_inv() * direction;
 
@@ -37,7 +37,7 @@ where T: Float + FromPrimitive {
 
         let discriminant = (b*b) - (four*a*c);
         if discriminant < T::zero() {
-            return (false, T::zero())
+            return IntersectResult::NoIntersect;
         }
 
         let sqrt_discriminant = T::sqrt(discriminant);
@@ -51,15 +51,15 @@ where T: Float + FromPrimitive {
 
         // if t1 is < 0, sphere is in the ray's negative dirction
         if t1 < T::zero() {
-            return (false, T::zero())
+            return IntersectResult::NoIntersect;
         }
 
         // if t0 < 0, intersection is at t1 (and we are inside the sphere)
         if t0 < T::zero() {
-            return (true, t1)
+            return IntersectResult::Intersect(t1);
         }
 
-        (true, t0)
+        return IntersectResult::Intersect(t0);
     }
 
     fn normal(&self, intersect_point: &Vec4<T>) -> Vec4<T> {
@@ -103,10 +103,12 @@ mod tests {
         let ray_origin = Vec4::position(0.0, 0.0, -10.0);
         let ray_direction = Vec4::direction(0.0, 0.0, 1.0);
 
-        let (intersected, t) = s.intersect(&ray_origin, &ray_direction);
+        let result = s.intersect(&ray_origin, &ray_direction);
 
-        assert_eq!(intersected, true);
-        assert_eq!(9.0, t);
+        match result {
+            IntersectResult::Intersect(t) => assert_eq!(9.0, t),
+            _ => assert!(false)
+        }
     }
 
     #[test]
@@ -116,9 +118,12 @@ mod tests {
         let ray_origin = Vec4::position(0.0, 0.0, -10.0);
         let ray_direction = Vec4::direction(0.0, 0.0, 1.0);
 
-        let (intersected, _) = s.intersect(&ray_origin, &ray_direction);
+        let result = s.intersect(&ray_origin, &ray_direction);
 
-        assert_eq!(intersected, false);
+        match result {
+            IntersectResult::NoIntersect => assert!(true),
+            _ => assert!(false)
+        }
     }
 
     #[test]

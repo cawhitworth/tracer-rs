@@ -5,9 +5,14 @@ use num::Float;
 use crate::vector::Vec4;
 use crate::matrix::Mat4;
 
+pub enum IntersectResult<T: Float> {
+    NoIntersect,
+    Intersect(T)
+}
+
 pub trait Intersectable<T: Float>
 {
-    fn intersect(&self, origin: &Vec4<T>, direction: &Vec4<T>) -> (bool, T);
+    fn intersect(&self, origin: &Vec4<T>, direction: &Vec4<T>) -> IntersectResult<T>;
     fn normal(&self, intersect_point: &Vec4<T>) -> Vec4<T>;
 }
 
