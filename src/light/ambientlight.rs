@@ -1,5 +1,6 @@
 use image::Rgb;
-use num::{Float, FromPrimitive, ToPrimitive};
+use num::Float;
+use num::FromPrimitive;
 
 use crate::object::Intersectable;
 use crate::vector::Vec4;

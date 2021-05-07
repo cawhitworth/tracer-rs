@@ -20,7 +20,7 @@ where T: Float {
 
 impl<T> Light<T> for DirectionLight<T>
 where T: Float + FromPrimitive {
-    fn illuminate(&self, object: &Box<dyn crate::object::Intersectable<T>>, hit_point: &Vec4<T>, eye_pos: &Vec4<T>) -> [T; 3] {
+    fn illuminate(&self, object: &Box<dyn crate::object::Intersectable<T>>, hit_point: &Vec4<T>, _: &Vec4<T>) -> [T; 3] {
         let norm = object.normal(hit_point).normalized();
         
         let illum = norm.dot_product(&self.direction_norm_inv);

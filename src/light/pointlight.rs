@@ -1,4 +1,3 @@
-use image::Rgb;
 use num::Float;
 
 use crate::vector::Vec4;
@@ -14,6 +13,12 @@ impl<T> Light<T> for PointLight<T>
 where T: Float {
 
     fn illuminate(&self, object: &Box<dyn Intersectable<T>>, hit_point: &Vec4<T>, eye_pos: &Vec4<T>) -> [T; 3] {
+        // Quiet the warnings
+        let _ = object;
+        let _ = hit_point;
+        let _ = eye_pos;
+        let _ = self.position;
+
         [T::zero(), T::zero(), T::zero()]
     }
 }
@@ -33,6 +38,6 @@ mod tests {
 
     #[test]
     fn construct() {
-        let l = PointLight::new(Vec4::position(0.0, 0.0, 0.0));
+        let _ = PointLight::new(Vec4::position(0.0, 0.0, 0.0));
     }
 }

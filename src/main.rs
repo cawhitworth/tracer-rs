@@ -9,15 +9,13 @@ use matrix::Mat4;
 use vector::Vec4;
 use engine::Engine;
 use object::sphere::Sphere;
-use light::{ambientlight::AmbientLight, directionlight::DirectionLight};
+use light::{ambientlight::AmbientLight, directionlight::DirectionLight, pointlight::PointLight};
 
 fn main() -> Result<(), ImageError> {
-    let fwd = Vec4::direction(0.0, 0.0, 1.0);
-    let right = Vec4::direction(1.0, 0.0, 0.0);
-    let up = Vec4::direction(0.0, 1.0, 0.0);
     let pos = Vec4::position(0.0, 0.0, -10.0);
+    let origin = Vec4::position(0.0, 0.0, 0.0);
 
-    let camera = Mat4::camera(&fwd, &right, &up, &pos);
+    let camera = Mat4::look(&pos,&origin);
 
     let sphere = Sphere::new(Vec4::position(0.0, 0.0, 0.0), 8.0);
 
@@ -29,6 +27,8 @@ fn main() -> Result<(), ImageError> {
 
     let alight = AmbientLight::new(Rgb([20, 20, 20]));
     engine.add_light(Box::new(alight));
+
+    let _ = PointLight::new(Vec4::position(-10.0, 10.0, -5.0));
 
     let img = engine.render(640,480);
 
