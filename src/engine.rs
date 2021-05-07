@@ -87,20 +87,34 @@ where T: Float + FromPrimitive + std::fmt::Debug {
         let fwidth: T = FromPrimitive::from_u32(width).unwrap();
         let fheight: T = FromPrimitive::from_u32(height).unwrap();
 
-        let fx_scale = two / (fwidth - T::one());
-        let fy_scale = two / (fheight - T::one());
+        let fx_scale: T;
+        let fy_scale: T;
+        let fx_origin: T;
+        let fy_origin: T;
 
+        if fwidth > fheight {
+            fx_scale = two / (fheight - T::one());
+            fy_scale = two / (fheight - T::one());
+            fx_origin = -(fwidth / fheight);
+            fy_origin = T::one();
+        } else {
+            fx_scale = two / (fwidth - T::one());
+            fy_scale = two / (fwidth - T::one());
+            fx_origin = -T::one();
+            fy_origin = fheight / fwidth;
+        }
+        
         for y in 0..height {
             for x in 0..width {
                 let mut fx = FromPrimitive::from_u32(x).unwrap();
                 let mut fy = FromPrimitive::from_u32(y).unwrap();
-                fx = -T::one() + fx * fx_scale;
-                fy = T::one() - fy * fy_scale;
+                fx = fx_origin + fx * fx_scale;
+                fy = fy_origin - fy * fy_scale;
                 let target = Vec4::position(fx, fy, T::zero());
                 image.put_pixel(x, y, self.trace_and_illuminate(world_origin, target));
-
             }
         }
+
         image
     }
 }
