@@ -7,10 +7,12 @@ use std::vec;
 use crate::vector::Vec4;
 use crate::matrix::Mat4;
 use crate::object::*;
+use crate::light::Light;
 
 pub struct Engine<T: Float> {
     view: Mat4<T>,
-    objects: Vec<Box<dyn Intersectable<T>>>
+    objects: Vec<Box<dyn Intersectable<T>>>,
+    lights: Vec<Box<dyn Light<T>>>
 }
 
 enum TraceResult<'a, T: Float> {
@@ -21,11 +23,15 @@ enum TraceResult<'a, T: Float> {
 impl<T> Engine<T> 
 where T: Float + FromPrimitive + std::fmt::Debug {
     pub fn new(view: Mat4<T>) -> Engine<T> {
-        Engine { view, objects: vec![] }
+        Engine { view, objects: vec![], lights: vec![] }
     }
 
-    pub fn add(&mut self, object: Box<dyn Intersectable<T>>) {
+    pub fn add_object(&mut self, object: Box<dyn Intersectable<T>>) {
         self.objects.push(object);
+    }
+
+    pub fn add_light(&mut self, light: Box<dyn Light<T>>) {
+        self.lights.push(light);
     }
 
     fn trace_ray(&self, origin: &Vec4<T>, direction: &Vec4<T>) -> TraceResult<T> {
@@ -45,20 +51,23 @@ where T: Float + FromPrimitive + std::fmt::Debug {
     }
 
     fn illuminate(&self, point: &Vec4<T>, object: &Box<dyn Intersectable<T>>) -> Rgb<u8> {
-        let dir_light = Vec4::direction(T::one(), -T::one(), T::one()).normalized();
-        let dir_light_inv = dir_light.reverse();
-
-        let norm = object.normal(point).normalized();
-        
-        let illum = norm.dot_product(&dir_light_inv);
-        if illum < T::zero() {
-            return image::Rgb([0,0,0])
+        let mut illum: [T; 3] = [T::zero(); 3];
+       
+        for l in self.lights.iter() {
+            let illum_result = l.illuminate(object, point, &Vec4::direction(T::zero(), T::zero(), T::zero() ));
+            for i in 0..3 {
+                illum[i] = illum[i] + illum_result[i];
+            }
         }
 
         let max_u8 = FromPrimitive::from_u8(0xff).unwrap();
-        let illum_scaled = illum * max_u8;
-        let illum_u8 = illum_scaled.to_u8().unwrap();
-        image::Rgb([illum_u8, illum_u8, illum_u8])
+        let illum_scaled = illum.iter()
+            .map(|channel| T::min(T::one(), T::max(T::zero(), *channel)))
+            .map(|channel| channel * max_u8)
+            .map(|channel| channel.to_u8().unwrap())
+            .collect::<Vec<_>>();
+
+        Rgb([illum_scaled[0], illum_scaled[1], illum_scaled[2]])
     }
 
     fn trace_and_illuminate(&self, world_origin: Vec4<T>, target: Vec4<T>) -> Rgb<u8> {

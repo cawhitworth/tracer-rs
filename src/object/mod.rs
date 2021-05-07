@@ -1,9 +1,9 @@
-pub mod sphere;
-
 use num::Float;
 
 use crate::vector::Vec4;
 use crate::matrix::Mat4;
+
+pub mod sphere;
 
 pub enum IntersectResult<T: Float> {
     NoIntersect,
