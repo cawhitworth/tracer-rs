@@ -1,7 +1,7 @@
 use num::Float;
 use std::ops::{Add, Mul, Sub, Index, IndexMut};
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct Vec4<T> 
 where T: Float {
     pub x: T,

@@ -12,7 +12,7 @@ pub struct PointLight<T: Float> {
 impl<T> Light<T> for PointLight<T>
 where T: Float {
 
-    fn illuminate(&self, object: &Box<dyn Intersectable<T>>, hit_point: &Vec4<T>, eye_pos: &Vec4<T>) -> [T; 3] {
+    fn illuminate(&self, object: &dyn Intersectable<T>, hit_point: &Vec4<T>, eye_pos: &Vec4<T>) -> [T; 3] {
         // Quiet the warnings
         let _ = object;
         let _ = hit_point;

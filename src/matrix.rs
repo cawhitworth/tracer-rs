@@ -4,21 +4,28 @@ use std::ops::{Index, IndexMut, Mul};
 
 use crate::vector::Vec4;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Mat4<T>
 where T: Float {
     d: [T; 16]
 }
 
+impl<T> Default for Mat4<T>
+where T: Float {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> Mat4<T>
 where T: Float {
-    pub fn new() -> Mat4<T> {
+    pub fn new() -> Self {
         Mat4 {
             d: [ T::zero(); 16 ]
         }
     }
 
-    pub fn i() -> Mat4<T> {
+    pub fn i() -> Self {
         let one = T::one();
         let zero = T::zero();
 
@@ -32,7 +39,7 @@ where T: Float {
         }
     }
 
-    pub fn camera(fwd: &Vec4<T>, right: &Vec4<T>, up: &Vec4<T>, pos: &Vec4<T>) -> Mat4<T> {
+    pub fn camera(fwd: &Vec4<T>, right: &Vec4<T>, up: &Vec4<T>, pos: &Vec4<T>) -> Self {
         let zero = T::zero();
         let one = T::one();
         Mat4 {
@@ -45,16 +52,16 @@ where T: Float {
         }
     }
 
-    pub fn look(position: &Vec4<T>, look_at: &Vec4<T>) -> Mat4<T> {
+    pub fn look(position: &Vec4<T>, look_at: &Vec4<T>) -> Self {
         let direction = (look_at - position).normalized();
         let temp_up = Vec4::direction(T::zero(), T::one(), T::zero());
         let right = temp_up.cross_product(&direction).normalized();
         let up = direction.cross_product(&right).normalized();
 
-        Mat4::camera(&direction, &right, &up, &position)
+        Mat4::camera(&direction, &right, &up, position)
     }
 
-    pub fn translation(translation: &Vec4<T>) -> Mat4<T> {
+    pub fn translation(translation: &Vec4<T>) -> Self {
         let mut t: Mat4<T> = Mat4::i();
         t[(3,0)] = translation.x;
         t[(3,1)] = translation.y;
@@ -63,7 +70,7 @@ where T: Float {
         t
     }
 
-    pub fn scale(factor: &Vec4<T>) -> Mat4<T> {
+    pub fn scale(factor: &Vec4<T>) -> Self {
         let mut s: Mat4<T> = Mat4::i();
         s[(0,0)] = factor.x;
         s[(1,1)] = factor.y;
@@ -72,7 +79,7 @@ where T: Float {
         s
     }
 
-    pub fn inverse(&self) -> Mat4<T> {
+    pub fn inverse(&self) -> Self {
         let mut inv = Mat4::new();
 
         inv[0] = self[5]  * self[10] * self[15] - 

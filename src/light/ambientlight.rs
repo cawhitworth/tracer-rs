@@ -29,7 +29,7 @@ where T: Float + FromPrimitive {
 
 impl<T> Light<T> for AmbientLight<T>
 where T: Float {
-    fn illuminate(&self, _: &Box<dyn Intersectable<T>>, _: &Vec4<T>, _: &Vec4<T>) -> [T; 3] {
+    fn illuminate(&self, _: &dyn Intersectable<T>, _: &Vec4<T>, _: &Vec4<T>) -> [T; 3] {
         self.colour
     }
 }

@@ -17,7 +17,7 @@ pub struct Engine<T: Float> {
 
 enum TraceResult<'a, T: Float> {
     Miss,
-    Hit(Vec4<T>, &'a Box<dyn Intersectable<T>>),
+    Hit(Vec4<T>, &'a dyn Intersectable<T>),
 }
 
 impl<T> Engine<T> 
@@ -37,20 +37,18 @@ where T: Float + FromPrimitive + std::fmt::Debug {
     fn trace_ray(&self, origin: &Vec4<T>, direction: &Vec4<T>) -> TraceResult<T> {
         for o in self.objects.iter() {
             let result = o.intersect(origin, direction);
-            match result {
-                IntersectResult::Intersect(t) => {
-                    let v = direction * t;
-                    let intersect_point = origin + &v;
-                    return TraceResult::Hit(intersect_point, o);
-                },
-                _ => {}
+
+            if let IntersectResult::Intersect(t) = result {
+                let v = direction * t;
+                let intersect_point = origin + &v;
+                return TraceResult::Hit(intersect_point, o);
             }
         }
             
         TraceResult::Miss 
     }
 
-    fn illuminate(&self, point: &Vec4<T>, object: &Box<dyn Intersectable<T>>) -> Rgb<u8> {
+    fn illuminate(&self, point: &Vec4<T>, object: &dyn Intersectable<T>) -> Rgb<u8> {
         let mut illum: [T; 3] = [T::zero(); 3];
        
         for l in self.lights.iter() {
