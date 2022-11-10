@@ -1,18 +1,24 @@
 use num::Float;
 
-use crate::vector::Vec4;
 use crate::object::Intersectable;
+use crate::vector::Vec4;
 
 use super::Light;
 
 pub struct PointLight<T: Float> {
-    position: Vec4<T>
+    position: Vec4<T>,
 }
 
 impl<T> Light<T> for PointLight<T>
-where T: Float {
-
-    fn illuminate(&self, object: &Box<dyn Intersectable<T>>, hit_point: &Vec4<T>, eye_pos: &Vec4<T>) -> [T; 3] {
+where
+    T: Float,
+{
+    fn illuminate(
+        &self,
+        object: &dyn Intersectable<T>,
+        hit_point: &Vec4<T>,
+        eye_pos: &Vec4<T>,
+    ) -> [T; 3] {
         // Quiet the warnings
         let _ = object;
         let _ = hit_point;
@@ -24,11 +30,11 @@ where T: Float {
 }
 
 impl<T> PointLight<T>
-where T: Float {
+where
+    T: Float,
+{
     pub fn new(position: Vec4<T>) -> PointLight<T> {
-        PointLight {
-            position
-        }
+        PointLight { position }
     }
 }
 

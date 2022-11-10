@@ -1,21 +1,21 @@
-mod vector;
-mod matrix;
-mod object;
 mod engine;
 mod light;
+mod matrix;
+mod object;
+mod vector;
 
-use image::{ImageError, Rgb};
-use matrix::Mat4;
-use vector::Vec4;
 use engine::Engine;
-use object::sphere::Sphere;
+use image::{ImageError, Rgb};
 use light::{ambientlight::AmbientLight, directionlight::DirectionLight, pointlight::PointLight};
+use matrix::Mat4;
+use object::sphere::Sphere;
+use vector::Vec4;
 
 fn main() -> Result<(), ImageError> {
     let pos = Vec4::position(0.0, 0.0, -10.0);
     let origin = Vec4::position(0.0, 0.0, 0.0);
 
-    let camera = Mat4::look(&pos,&origin);
+    let camera = Mat4::look(&pos, &origin);
 
     let sphere = Sphere::new(Vec4::position(0.0, 0.0, 0.0), 8.0);
 
@@ -30,7 +30,7 @@ fn main() -> Result<(), ImageError> {
 
     let _ = PointLight::new(Vec4::position(-10.0, 10.0, -5.0));
 
-    let img = engine.render(640,480);
+    let img = engine.render(640, 480);
 
     img.save("output.png")
 }
