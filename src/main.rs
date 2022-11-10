@@ -22,13 +22,14 @@ fn main() -> Result<(), ImageError> {
     let mut engine = Engine::new(camera);
     engine.add_object(Box::new(sphere));
 
-    let dlight = DirectionLight::new(Vec4::direction(1.0, -1.0, 0.1).normalized());
-    engine.add_light(Box::new(dlight));
+    let _dlight = DirectionLight::new(Vec4::direction(1.0, -1.0, 0.1).normalized());
+//    engine.add_light(Box::new(dlight));
 
     let alight = AmbientLight::new(Rgb([20, 20, 20]));
     engine.add_light(Box::new(alight));
 
-    let _ = PointLight::new(Vec4::position(-10.0, 10.0, -5.0));
+    let plight = PointLight::new(Vec4::position(-25.0, 25.0, -25.0));
+    engine.add_light(Box::new(plight));
 
     let img = engine.render(640, 480);
 

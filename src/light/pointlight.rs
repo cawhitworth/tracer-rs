@@ -17,15 +17,18 @@ where
         &self,
         object: &dyn Intersectable<T>,
         hit_point: &Vec4<T>,
-        eye_pos: &Vec4<T>,
+        _: &Vec4<T>,
     ) -> [T; 3] {
-        // Quiet the warnings
-        let _ = object;
-        let _ = hit_point;
-        let _ = eye_pos;
-        let _ = self.position;
+        let norm = object.normal(hit_point).normalized();
 
-        [T::zero(), T::zero(), T::zero()]
+        let light_vec = &self.position - &hit_point;
+
+        let illum = norm.dot_product(&light_vec.normalized());
+        if illum < T::zero() {
+            return [T::zero(), T::zero(), T::zero()];
+        }
+
+        [illum, illum, illum]
     }
 }
 
