@@ -2,14 +2,14 @@ use std::mem;
 
 use num::{Float, FromPrimitive};
 
-use crate::vector::Vec4;
-use crate::matrix::Mat4;
 use super::*;
+use crate::matrix::Mat4;
+use crate::vector::Vec4;
 
 #[derive(Debug)]
 pub struct Sphere<T: Float> {
     object: Mat4<T>,
-    object_inverse: Mat4<T>
+    object_inverse: Mat4<T>,
 }
 
 impl<T: Float> WorldObject<T> for Sphere<T> {
@@ -22,20 +22,22 @@ impl<T: Float> WorldObject<T> for Sphere<T> {
     }
 }
 
-impl<T> Intersectable<T> for Sphere<T> 
-where T: Float + FromPrimitive {
+impl<T> Intersectable<T> for Sphere<T>
+where
+    T: Float + FromPrimitive,
+{
     fn intersect(&self, origin: &Vec4<T>, direction: &Vec4<T>) -> IntersectResult<T> {
         let transformed_origin = self.object_matrix_inv() * origin;
         let transformed_direction = self.object_matrix_inv() * direction;
 
-        let two= FromPrimitive::from_f64(2.0).unwrap();
+        let two = FromPrimitive::from_f64(2.0).unwrap();
         let four: T = FromPrimitive::from_f64(4.0).unwrap();
-        
+
         let a = transformed_direction.dot_product(&transformed_direction);
         let b = transformed_direction.dot_product(&transformed_origin) * two;
         let c = transformed_origin.dot_product(&transformed_origin) - T::one();
 
-        let discriminant = (b*b) - (four*a*c);
+        let discriminant = (b * b) - (four * a * c);
         if discriminant < T::zero() {
             return IntersectResult::NoIntersect;
         }
@@ -64,7 +66,7 @@ where T: Float + FromPrimitive {
 
     fn normal(&self, intersect_point: &Vec4<T>) -> Vec4<T> {
         let v = self.object_matrix_inv() * intersect_point;
-        v.normalized() 
+        v.normalized()
     }
 }
 
@@ -79,7 +81,7 @@ impl<T: Float> Sphere<T> {
 
         Sphere {
             object: object_matrix,
-            object_inverse: object_matrix_inverse
+            object_inverse: object_matrix_inverse,
         }
     }
 }
@@ -107,7 +109,7 @@ mod tests {
 
         match result {
             IntersectResult::Intersect(t) => assert_eq!(9.0, t),
-            _ => assert!(false)
+            _ => assert!(false),
         }
     }
 
@@ -122,7 +124,7 @@ mod tests {
 
         match result {
             IntersectResult::NoIntersect => assert!(true),
-            _ => assert!(false)
+            _ => assert!(false),
         }
     }
 

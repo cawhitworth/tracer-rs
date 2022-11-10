@@ -4,15 +4,15 @@ use image::Rgb;
 use num::{Float, FromPrimitive};
 use std::vec;
 
-use crate::vector::Vec4;
+use crate::light::Light;
 use crate::matrix::Mat4;
 use crate::object::*;
-use crate::light::Light;
+use crate::vector::Vec4;
 
 pub struct Engine<T: Float> {
     view: Mat4<T>,
     objects: Vec<Box<dyn Intersectable<T>>>,
-    lights: Vec<Box<dyn Light<T>>>
+    lights: Vec<Box<dyn Light<T>>>,
 }
 
 enum TraceResult<'a, T: Float> {
@@ -20,10 +20,16 @@ enum TraceResult<'a, T: Float> {
     Hit(Vec4<T>, &'a dyn Intersectable<T>),
 }
 
-impl<T> Engine<T> 
-where T: Float + FromPrimitive + std::fmt::Debug {
+impl<T> Engine<T>
+where
+    T: Float + FromPrimitive + std::fmt::Debug,
+{
     pub fn new(view: Mat4<T>) -> Engine<T> {
-        Engine { view, objects: vec![], lights: vec![] }
+        Engine {
+            view,
+            objects: vec![],
+            lights: vec![],
+        }
     }
 
     pub fn add_object(&mut self, object: Box<dyn Intersectable<T>>) {
@@ -44,22 +50,27 @@ where T: Float + FromPrimitive + std::fmt::Debug {
                 return TraceResult::Hit(intersect_point, o);
             }
         }
-            
-        TraceResult::Miss 
+
+        TraceResult::Miss
     }
 
     fn illuminate(&self, point: &Vec4<T>, object: &dyn Intersectable<T>) -> Rgb<u8> {
         let mut illum: [T; 3] = [T::zero(); 3];
-       
+
         for l in self.lights.iter() {
-            let illum_result = l.illuminate(object, point, &Vec4::direction(T::zero(), T::zero(), T::zero() ));
+            let illum_result = l.illuminate(
+                object,
+                point,
+                &Vec4::direction(T::zero(), T::zero(), T::zero()),
+            );
             for i in 0..3 {
                 illum[i] = illum[i] + illum_result[i];
             }
         }
 
         let max_u8 = FromPrimitive::from_u8(0xff).unwrap();
-        let illum_scaled = illum.iter()
+        let illum_scaled = illum
+            .iter()
             .map(|channel| T::min(T::one(), T::max(T::zero(), *channel)))
             .map(|channel| channel * max_u8)
             .map(|channel| channel.to_u8().unwrap())
@@ -74,10 +85,9 @@ where T: Float + FromPrimitive + std::fmt::Debug {
         let hit = self.trace_ray(&world_origin, &world_direction);
 
         match hit {
-            TraceResult::Miss => image::Rgb([0,0,0]),
-            TraceResult::Hit(point, object) => self.illuminate(&point, object)
+            TraceResult::Miss => image::Rgb([0, 0, 0]),
+            TraceResult::Hit(point, object) => self.illuminate(&point, object),
         }
-
     }
 
     pub fn render(&self, width: u32, height: u32) -> image::RgbImage {
@@ -110,7 +120,7 @@ where T: Float + FromPrimitive + std::fmt::Debug {
             fx_origin = -T::one();
             fy_origin = fheight / fwidth;
         }
-        
+
         for y in 0..height {
             for x in 0..width {
                 let mut fx = FromPrimitive::from_u32(x).unwrap();

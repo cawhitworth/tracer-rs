@@ -1,9 +1,11 @@
 use num::Float;
-use std::ops::{Add, Mul, Sub, Index, IndexMut};
+use std::ops::{Add, Index, IndexMut, Mul, Sub};
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
-pub struct Vec4<T> 
-where T: Float {
+pub struct Vec4<T>
+where
+    T: Float,
+{
     pub x: T,
     pub y: T,
     pub z: T,
@@ -11,13 +13,25 @@ where T: Float {
 }
 
 impl<T> Vec4<T>
-where T: Float{
+where
+    T: Float,
+{
     pub fn position(x: T, y: T, z: T) -> Vec4<T> {
-        Vec4 { x, y, z, w: T::one() }
+        Vec4 {
+            x,
+            y,
+            z,
+            w: T::one(),
+        }
     }
-    
+
     pub fn direction(x: T, y: T, z: T) -> Vec4<T> {
-        Vec4 { x, y, z, w: T::zero() }
+        Vec4 {
+            x,
+            y,
+            z,
+            w: T::zero(),
+        }
     }
 
     pub fn dot_product(&self, other: &Vec4<T>) -> T {
@@ -29,7 +43,7 @@ where T: Float{
             x: (self.y * other.z) - (self.z * other.y),
             y: (self.z * other.x) - (self.x * other.z),
             z: (self.x * other.y) - (self.y * other.x),
-            w: T::zero()
+            w: T::zero(),
         }
     }
 
@@ -43,7 +57,7 @@ where T: Float{
             x: self.x / mag,
             y: self.y / mag,
             z: self.z / mag,
-            w: self.w
+            w: self.w,
         }
     }
 
@@ -52,7 +66,7 @@ where T: Float{
             x: -self.x,
             y: -self.y,
             z: -self.z,
-            w: self.w
+            w: self.w,
         }
     }
 }
@@ -61,35 +75,58 @@ where T: Float{
 To consider - use the impl_ops crate
 */
 
-impl<T> Add for &Vec4<T> 
-where T: Float {
+impl<T> Add for &Vec4<T>
+where
+    T: Float,
+{
     type Output = Vec4<T>;
 
     fn add(self, other: &Vec4<T>) -> Vec4<T> {
-        Vec4{ x: self.x + other.x, y: self.y + other.y, z: self.z + other.z, w: self.w }
+        Vec4 {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+            w: self.w,
+        }
     }
 }
 
 impl<T> Sub for &Vec4<T>
-where T: Float {
+where
+    T: Float,
+{
     type Output = Vec4<T>;
 
     fn sub(self, other: &Vec4<T>) -> Vec4<T> {
-        Vec4 { x: self.x - other.x, y: self.y - other.y, z: self.z - other.z, w: T::zero() }
+        Vec4 {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+            w: T::zero(),
+        }
     }
 }
 
 impl<T> Mul<T> for &Vec4<T>
-where T: Float {
+where
+    T: Float,
+{
     type Output = Vec4<T>;
 
     fn mul(self, other: T) -> Vec4<T> {
-        Vec4 { x: self.x * other, y: self.y * other, z: self.z * other, w: self.w }
+        Vec4 {
+            x: self.x * other,
+            y: self.y * other,
+            z: self.z * other,
+            w: self.w,
+        }
     }
 }
 
 impl<T> Index<usize> for Vec4<T>
-where T: Float {
+where
+    T: Float,
+{
     type Output = T;
 
     fn index(&self, index: usize) -> &T {
@@ -98,21 +135,22 @@ where T: Float {
             1 => &self.y,
             2 => &self.z,
             3 => &self.w,
-            _ => std::panic!("Vector index must be 0..3")
+            _ => std::panic!("Vector index must be 0..3"),
         }
     }
 }
 
 impl<T> IndexMut<usize> for Vec4<T>
-where T: Float {
-
+where
+    T: Float,
+{
     fn index_mut(&mut self, index: usize) -> &mut T {
         match index {
             0 => &mut self.x,
             1 => &mut self.y,
             2 => &mut self.z,
             3 => &mut self.w,
-            _ => std::panic!("Vector index must be 0..3")
+            _ => std::panic!("Vector index must be 0..3"),
         }
     }
 }
